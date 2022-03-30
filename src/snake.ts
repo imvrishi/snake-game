@@ -1,5 +1,15 @@
-import { SnakeParts } from "./snake-parts.js";
-import { Game } from "./game.js";
+import { SnakeParts } from "./snake-parts";
+import { Game } from "./game";
+import { config } from "./config";
+
+const {
+  tileSize,
+  blockSize,
+  tileCountX,
+  tileCountY,
+  canvasWidth,
+  canvasHeight,
+} = config;
 
 export class Snake {
   private headX = 0;
@@ -11,8 +21,8 @@ export class Snake {
   public readonly parts: SnakeParts[] = [];
 
   constructor(game: Game) {
-    this.headX = Math.floor(game.tileCountX / 2);
-    this.headY = Math.floor(game.tileCountY / 2);
+    this.headX = Math.floor(tileCountX / 2);
+    this.headY = Math.floor(tileCountY / 2);
     this.game = game;
   }
 
@@ -25,7 +35,7 @@ export class Snake {
   }
 
   draw() {
-    const { ctx, tileSize, blockSize } = this.game;
+    const { ctx } = this.game;
 
     while (this.parts.length > this.tailLength) {
       this.parts.pop();
@@ -62,7 +72,7 @@ export class Snake {
       this.game.score++;
       this.tailLength++;
       if (this.game.score && this.game.score % 5 === 0) {
-        this.game.frameRate += 5;
+        config.frameRate += 5;
       }
     }
   }
@@ -73,7 +83,6 @@ export class Snake {
       return false;
     }
 
-    const { tileCountX, tileCountY } = this.game;
     if (this.headX < 0) {
       isGameOver = true;
     } else if (this.headX === tileCountX) {
@@ -92,16 +101,16 @@ export class Snake {
     }
 
     if (isGameOver) {
-      const { ctx, canvas } = this.game;
+      const { ctx } = this.game;
       const scoreString = `Game Over!`;
       ctx.fillStyle = "white";
-      const fontSize = canvas.width / 10;
+      const fontSize = canvasWidth / 10;
       ctx.font = fontSize + "pt Verdana";
       const textWidth = ctx.measureText(scoreString).width;
       ctx.fillText(
         scoreString,
-        canvas.width / 2 - textWidth / 2,
-        canvas.height / 2
+        canvasWidth / 2 - textWidth / 2,
+        canvasHeight / 2
       );
     }
 

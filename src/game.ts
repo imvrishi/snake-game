@@ -1,49 +1,48 @@
-import { Apple } from "./apple.js";
-import { Snake } from "./snake.js";
+import { Apple } from "./apple";
+import { Snake } from "./snake";
+import { config } from "./config";
+
+const { canvasWidth, canvasHeight, fontMaxLimit, fontMinLimit } =
+  config;
 
 export class Game {
   private lastRenderTime = 0;
   private isGameOver = false;
-  public frameRate = 10;
   public score = 0;
-  public readonly tileSize = 30;
-  public readonly blockSize: number;
   public readonly canvas: HTMLCanvasElement;
   public readonly ctx: CanvasRenderingContext2D;
-  public readonly tileCountX: number;
-  public readonly tileCountY: number;
   public readonly snake: Snake;
   public readonly apple: Apple;
 
   constructor() {
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.draw = this.draw.bind(this);
+
     this.canvas = document.getElementById("board") as HTMLCanvasElement;
-    this.canvas.width = window.innerWidth - (window.innerWidth % this.tileSize);
-    this.canvas.height =
-      window.innerHeight - (window.innerHeight % this.tileSize);
+    this.canvas.width = canvasWidth;
+    this.canvas.height = canvasHeight;
+
     if (this.canvas.parentElement) {
       this.canvas.parentElement.addEventListener(
-        "keypress",
-        this.handleKeyPress.bind(this)
+        "keydown",
+        this.handleKeyPress
       );
     } else {
       console.log("Probably the html structure has changed");
     }
 
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-    this.blockSize = this.tileSize - 2;
-    this.tileCountX = Math.floor(this.canvas.width / this.tileSize);
-    this.tileCountY = Math.floor(this.canvas.height / this.tileSize);
 
     this.snake = new Snake(this);
     this.apple = new Apple(this);
 
-    window.requestAnimationFrame(this.draw.bind(this));
+    window.requestAnimationFrame(this.draw);
   }
 
   draw(currentTime: number) {
     const timeSinceLastRender = (currentTime - this.lastRenderTime) / 1000;
-    window.requestAnimationFrame(this.draw.bind(this));
-    if (timeSinceLastRender < 1 / this.frameRate) return;
+    window.requestAnimationFrame(this.draw);
+    if (timeSinceLastRender < 1 / config.frameRate) return;
     this.lastRenderTime = currentTime;
 
     this.snake.move();
@@ -58,20 +57,18 @@ export class Game {
 
   clear() {
     this.ctx.fillStyle = "black";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   }
 
   drawScore() {
-    const fontMinLimit = 10;
-    const fontMaxLimit = 20;
-    const scoreString = `Score: ${this.score} - Speed: ${this.frameRate} `;
+    const scoreString = `Score: ${this.score} - Speed: ${config.frameRate}`;
     this.ctx.fillStyle = "white";
-    let fontSize = this.canvas.width / 40;
+    let fontSize = canvasWidth / 40;
     fontSize = Math.min(fontMaxLimit, fontSize);
     fontSize = Math.max(fontMinLimit, fontSize);
     this.ctx.font = fontSize + "pt Verdana";
     const textWidth = this.ctx.measureText(scoreString).width;
-    this.ctx.fillText(scoreString, this.canvas.width - textWidth, fontSize);
+    this.ctx.fillText(scoreString, canvasWidth - textWidth, fontSize);
   }
 
   handleKeyPress(e: KeyboardEvent) {
